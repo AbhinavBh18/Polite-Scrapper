@@ -1,6 +1,5 @@
 """Cache-first HTTP access to the Books to Scrape sandbox."""
 
-import os
 import re
 import time
 from datetime import datetime, timezone
@@ -21,6 +20,10 @@ PRODUCT_PATH = re.compile(r"/catalogue/([a-zA-Z0-9_-]+_\d+)/index\.html")
 
 class FetchError(Exception):
     """The URL could not be fetched or safely loaded from cache."""
+
+
+class RetryableFetchError(FetchError):
+    """A timeout or server failure that can be retried once."""
 
 
 def utc_timestamp(epoch: float) -> str:
@@ -77,7 +80,11 @@ class Fetcher:
                 self.cache_hits += 1
                 print(f"CACHE HIT {len(html)} bytes {url}")
             else:
-                html = self._download(url)
+                try:
+                    html = self._download(url)
+                except RetryableFetchError as exc:
+                    print(f"RETRY {url}: {exc}")
+                    html = self._download(url)
                 write_atomic(path, html)
             return html, utc_timestamp(path.stat().st_mtime)
         except (OSError, ValueError) as exc:
@@ -91,11 +98,15 @@ class Fetcher:
             response = self.session.get(
                 url, headers={"User-Agent": self.user_agent}, timeout=TIMEOUT, allow_redirects=False
             )
+        except requests.Timeout as exc:
+            raise RetryableFetchError(f"Timeout after {TIMEOUT} seconds") from exc
         except requests.RequestException as exc:
             raise FetchError(str(exc)) from exc
         finally:
             self.last_request_finished = time.monotonic()
 
+        if 500 <= response.status_code <= 599:
+            raise RetryableFetchError(f"HTTP {response.status_code}")
         if response.status_code != 200:
             raise FetchError(f"HTTP {response.status_code}")
 
