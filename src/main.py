@@ -4,11 +4,13 @@ from pathlib import Path
 
 import requests
 
-from fetch import BASE_URL, DEFAULT_AGENT, Fetcher
+from catalogue import discover
+from fetch import DEFAULT_AGENT, Fetcher
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 if __name__ == "__main__":
     with requests.Session() as session:
-        Fetcher(ROOT / "cache", session, DEFAULT_AGENT).get(BASE_URL)
+        books, pages, discovered = discover(Fetcher(ROOT / "cache", session, DEFAULT_AGENT))
+        print(f"catalogue_pages={pages} discovered={discovered} unique_urls={len(books)}")
