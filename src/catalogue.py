@@ -2,14 +2,14 @@
 
 from urllib.parse import urljoin, urlsplit
 
-from bs4 import BeautifulSoup
-
 from fetch import BASE_URL, PRODUCT_PATH, FetchError, Fetcher, cache_key
 
 CATALOGUE_LIMIT = 3
 
 
 def catalogue_links(html: bytes) -> tuple[list[str], str | None]:
+    from bs4 import BeautifulSoup
+
     soup = BeautifulSoup(html, "html.parser", from_encoding="utf-8")
     books = [str(link["href"]) for link in soup.select("article.product_pod h3 a[href]")]
     if not books:

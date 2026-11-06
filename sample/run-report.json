@@ -1,0 +1,17 @@
+{
+  "started_at": "2026-11-06T14:29:33Z",
+  "duration_seconds": 0.332,
+  "through": "full",
+  "simulated_missing": false,
+  "catalogue_pages": 3,
+  "discovered": 60,
+  "unique_urls": 60,
+  "detail_pages": 60,
+  "requests_sent": 63,
+  "pages_fetched": 63,
+  "cache_hits": 0,
+  "valid_records": 60,
+  "invalid_records": 0,
+  "failed_pages": 0,
+  "discovery_errors": 0
+}

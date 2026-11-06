@@ -1,7 +1,5 @@
 """Extract the eight raw fields from a book's detail page."""
 
-from bs4 import BeautifulSoup
-
 RATINGS = {"One", "Two", "Three", "Four", "Five"}
 
 
@@ -12,6 +10,8 @@ def clean_text(element) -> str | None:
 
 
 def extract_book(html: bytes, product_url: str, source_page: str, fetched_at: str) -> dict:
+    from bs4 import BeautifulSoup
+
     soup = BeautifulSoup(html, "html.parser", from_encoding="utf-8")
     product = soup.select_one("article.product_page")
     if product is None:

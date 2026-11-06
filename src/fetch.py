@@ -48,15 +48,11 @@ def cache_key(url: str) -> Path:
 
 def write_atomic(path: Path, data: bytes) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    with NamedTemporaryFile(dir=path.parent, delete=False) as temp:
-        temp_path = Path(temp.name)
-        try:
-            temp.write(data)
-        except OSError:
-            temp.close()
-            temp_path.unlink(missing_ok=True)
-            raise
+    temp = NamedTemporaryFile(dir=path.parent, delete=False)
+    temp_path = Path(temp.name)
     try:
+        with temp:
+            temp.write(data)
         temp_path.replace(path)
     finally:
         temp_path.unlink(missing_ok=True)
